@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:onClick="save"
+        android:padding="20dp"
+        android:stretchColumns="1">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/MetricText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Track your progress for " />
+
+            <EditText
+                android:id="@+id/dateText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:focusable="false"
+                android:inputType="date" />
+        </LinearLayout>
+
+        <TableRow style="@style/MetricPadding">
+
+            <TextView
+                android:id="@+id/textView2"
+                style="@style/MetricText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sleep" />
+
+            <RadioGroup
+                android:id="@+id/sleep"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/sleep9"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SLEEP_9" />
+
+                <RadioButton
+                    android:id="@+id/sleep8"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SLEEP_8" />
+
+                <RadioButton
+                    android:id="@+id/sleep7"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/SLEEP_7" />
+
+                <RadioButton
+                    android:id="@+id/defaultSleep"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="save"
+                    android:text="Less" />
+            </RadioGroup>
+        </TableRow>
+
+        <TableRow style="@style/MetricPadding">
+
+            <TextView
+                android:id="@+id/textView3"
+                style="@style/MetricText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Exercise" />
+
+            <RadioGroup
+                android:id="@+id/exercise"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/exerciseGood"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/GOOD" />
+
+                <RadioButton
+                    android:id="@+id/exerciseAverage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/AVERAGE" />
+
+                <RadioButton
+                    android:id="@+id/exerciseMild"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/MILD" />
+
+                <RadioButton
+                    android:id="@+id/exerciseWarmup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/WARMUP" />
+
+                <RadioButton
+                    android:id="@+id/defaultExercise"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:onClick="save"
+                    android:text="@string/NONE" />
+
+            </RadioGroup>
+        </TableRow>
+
+        <TableRow style="@style/MetricPadding">
+
+            <TextView
+                style="@style/MetricText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nutrition" />
+
+            <RadioGroup
+                android:id="@+id/nutrition"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/nutritionGood"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/GOOD" />
+
+                <RadioButton
+                    android:id="@+id/nutritionAverage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/AVERAGE" />
+
+                <RadioButton
+                    android:id="@+id/defaultNutrition"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/BAD" />
+            </RadioGroup>
+        </TableRow>
+
+        <TableRow style="@style/MetricPadding">
+
+            <TextView
+                style="@style/MetricText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Infection" />
+
+            <RadioGroup
+                android:id="@+id/infection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/defaultInfection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/NO" />
+
+                <RadioButton
+                    android:id="@+id/infectionProbably"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/PROBABLY" />
+
+                <RadioButton
+                    android:id="@+id/infectionYes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/YES" />
+
+                <RadioButton
+                    android:id="@+id/infectionAntibiotics"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ANTIBIOTICS" />
+            </RadioGroup>
+        </TableRow>
+
+        <TableRow style="@style/MetricPadding">
+
+            <TextView
+                style="@style/MetricText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Meditation" />
+
+            <RadioGroup
+                android:id="@+id/meditation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/meditation60"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/MEDIATATION_60" />
+
+                <RadioButton
+                    android:id="@+id/meditation30"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/MEDIATATION_30" />
+
+                <RadioButton
+                    android:id="@+id/meditation10"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/MEDIATATION_10" />
+
+                <RadioButton
+                    android:id="@+id/defaultMeditation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/NONE" />
+            </RadioGroup>
+        </TableRow>
+
+        <TableRow style="@style/MetricPadding">
+
+            <TextView
+                style="@style/MetricText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Overeating" />
+
+            <RadioGroup
+                android:id="@+id/overeating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/overeatingNo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/NO" />
+
+                <RadioButton
+                    android:id="@+id/overeatingJustRight"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/JUST_RIGHT" />
+
+                <RadioButton
+                    android:id="@+id/defaultOvereating"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/YES" />
+            </RadioGroup>
+        </TableRow>
+
+        <TableRow style="@style/MetricPadding">
+
+            <TextView
+                style="@style/MetricText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mental Stress" />
+
+            <RadioGroup
+                android:id="@+id/mentalStress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/mshappy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/HAPPY" />
+
+                <RadioButton
+                    android:id="@+id/msno"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/NO" />
+
+                <RadioButton
+                    android:id="@+id/msmild"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/MILD" />
+
+                <RadioButton
+                    android:id="@+id/defaultMentalStress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/HIGH" />
+            </RadioGroup>
+        </TableRow>
+
+        <TableRow style="@style/MetricPadding">
+
+            <TextView
+                style="@style/MetricText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Physical Stress" />
+
+            <RadioGroup
+                android:id="@+id/physicalStress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RadioButton
+                    android:id="@+id/psno"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/NO" />
+
+                <RadioButton
+                    android:id="@+id/psmild"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/MILD" />
+
+                <RadioButton
+                    android:id="@+id/defaultPhysicalStress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/HIGH" />
+            </RadioGroup>
+        </TableRow>
+
+        <Button
+            android:id="@+id/submitBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="save"
+            android:text="Submit" />
+
+    </TableLayout>
+</ScrollView>

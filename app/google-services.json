@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "33122619749",
+    "firebase_url": "https://recovery-tracker.firebaseio.com",
+    "project_id": "recovery-tracker",
+    "storage_bucket": "recovery-tracker.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:33122619749:android:3957ee22f8f01bda5b118c",
+        "android_client_info": {
+          "package_name": "m.example.fibrorecoverytracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "33122619749-i995cbq04fp3prif4eup2cd8g4qkt00l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8blwdANqwc6W3kRtmFRjYv00NeriPLvA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "33122619749-i995cbq04fp3prif4eup2cd8g4qkt00l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

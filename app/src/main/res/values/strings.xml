@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">Fibro Recovery Tracker</string>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
+    <string name="NONE"><![CDATA[None]]></string>
+
+    <string name="SLEEP_9"><![CDATA[>9 Hrs]]></string>
+    <string name="SLEEP_8"><![CDATA[>8 Hrs]]></string>
+    <string name="SLEEP_7"><![CDATA[>7 Hrs]]></string>
+    <string name="SLEEP_LESS"><![CDATA[Less]]></string>
+
+    <string name="GOOD"><![CDATA[Good]]></string>
+    <string name="AVERAGE"><![CDATA[Average]]></string>
+    <string name="BAD"><![CDATA[Bad]]></string>
+    <string name="MILD"><![CDATA[Mild]]></string>
+    <string name="WARMUP"><![CDATA[Only Warm Up]]></string>
+    <string name="YES"><![CDATA[Yes]]></string>
+    <string name="NO"><![CDATA[No]]></string>
+    <string name="PROBABLY"><![CDATA[Probably]]></string>
+    <string name="ANTIBIOTICS"><![CDATA[Antibiotics]]></string>
+    <string name="MEDIATATION_60"><![CDATA[1 Hour]]></string>
+    <string name="MEDIATATION_30"><![CDATA[30 Minutes]]></string>
+    <string name="MEDIATATION_10"><![CDATA[10 Minutes]]></string>
+    <string name="JUST_RIGHT"><![CDATA[Just Right]]></string>
+    <string name="HAPPY"><![CDATA[Happy]]></string>
+    <string name="HIGH"><![CDATA[High]]></string>
+
+</resources>
