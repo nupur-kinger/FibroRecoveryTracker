@@ -1,6 +1,8 @@
 package m.example.fibrorecoverytracker
 
 import Score
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.os.Bundle
@@ -16,6 +18,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_track.*
 import kotlinx.android.synthetic.main.activity_track.view.*
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -28,8 +31,11 @@ class TrackActivity : AppCompatActivity() {
     }
 
     private var database: DatabaseReference = Firebase.database.reference
-    private val formatter = DateTimeFormatter.ofPattern("dd-MMM-yyy")
-    private lateinit var date: String
+    private lateinit var date: LocalDate
+    private lateinit var extraContent: View
+    private lateinit var addExtraText: View
+    private var shortAnimationDuration: Int = 0
+    private var extrasVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,22 +43,26 @@ class TrackActivity : AppCompatActivity() {
 
         database = Firebase.database.reference
         createConstants()
+        extraContent = findViewById<View>(R.id.extraContent)
+        addExtraText = findViewById<View>(R.id.addExtraText)
+        extraContent.visibility = View.GONE
+        shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
+        var dateString: String = ""
         if (intent.hasExtra(EXTRA_DATE)) {
             // EDIT
-            date = intent.getStringExtra(EXTRA_DATE)!!
+            date = intent.getSerializableExtra(EXTRA_DATE) as LocalDate
+            dateString = Constants.DATE_FORMATTER.format(date)
             setSelections(intent.getSerializableExtra(EXTRA_SCORE) as Score)
         } else {
             // TODAY
-            date = formatter.format(LocalDateTime.now())
-            fetchForDate(date)
+            date = LocalDate.now()
+            dateString = Constants.DATE_FORMATTER.format(date)
+            fetchForDate(dateString)
         }
 
-//        findViewById<TextView>(R.id.dateText1).text = date
-
-        println("Date set")
         val dateText: EditText = findViewById<EditText>(R.id.dateText)
-        dateText.text = SpannableStringBuilder(date)
+        dateText.text = SpannableStringBuilder(dateString)
         dateText.setOnClickListener {
             val today = LocalDateTime.now()
             val dpd = DatePickerDialog(
@@ -60,7 +70,15 @@ class TrackActivity : AppCompatActivity() {
                 DatePickerDialog.OnDateSetListener { dateText, year, monthOfYear, dayOfMonth ->
 
                     val formattedDate =
-                        formatter.format(LocalDateTime.of(year, monthOfYear, dayOfMonth, 0, 0))
+                        Constants.DATE_FORMATTER.format(
+                            LocalDateTime.of(
+                                year,
+                                monthOfYear,
+                                dayOfMonth,
+                                0,
+                                0
+                            )
+                        )
                     it.dateText.text = SpannableStringBuilder(formattedDate)
                     fetchForDate(formattedDate)
 
@@ -75,6 +93,37 @@ class TrackActivity : AppCompatActivity() {
 
     }
 
+    fun toggleExtras(view: View) {
+        if (extrasVisible) {
+            collapseExtras()
+        } else {
+            expandExtras()
+        }
+        extrasVisible = !extrasVisible
+    }
+
+    fun expandExtras() {
+        extraContent.apply {
+            alpha = 0f
+            visibility = View.VISIBLE
+            animate()
+                .alpha(1f)
+                .setDuration(shortAnimationDuration.toLong())
+                .setListener(null)
+        }
+    }
+
+    fun collapseExtras() {
+        extraContent.apply {
+            alpha = 1f
+            visibility = View.GONE
+            animate()
+                .alpha(0f)
+                .setDuration(shortAnimationDuration.toLong())
+                .setListener(null)
+        }
+    }
+
     fun save(view: View) {
         val sleepScore = sleepScore(selectedText(R.id.sleep))
         val exerciseScore = exerciseScore(selectedText(R.id.exercise))
@@ -84,8 +133,14 @@ class TrackActivity : AppCompatActivity() {
         val overeatingScore = overeatingScore(selectedText(R.id.overeating))
         val mentalStressScore = mentalStressScore(selectedText(R.id.mentalStress))
         val physicalStressScore = physicalStressScore(selectedText(R.id.physicalStress))
+        val saunaScore = if (findViewById<CheckBox>(R.id.sauna).isChecked) 1 else 0
+        val physiotherapyScore = if (findViewById<CheckBox>(R.id.physio).isChecked) 1 else 0
+        val massageScore = if (findViewById<CheckBox>(R.id.massage).isChecked) 1 else 0
+        val accupunctureScore = if (findViewById<CheckBox>(R.id.accupuncture).isChecked) 1 else 0
+        val pranayamaScore = if (findViewById<CheckBox>(R.id.pranayama).isChecked) 1 else 0
         val total =
-            sleepScore + exerciseScore + nutritionScore + infectionScore + meditationScore + overeatingScore + mentalStressScore + physicalStressScore;
+            sleepScore + exerciseScore + nutritionScore + infectionScore + meditationScore + overeatingScore + mentalStressScore + physicalStressScore + saunaScore + physiotherapyScore
+            + massageScore + accupunctureScore + pranayamaScore
 
         var score = Score(
             sleepScore,
@@ -96,10 +151,15 @@ class TrackActivity : AppCompatActivity() {
             overeatingScore,
             mentalStressScore,
             physicalStressScore,
+            saunaScore,
+            physiotherapyScore,
+            pranayamaScore,
+            accupunctureScore,
+            massageScore,
             total
         )
 
-        database.child("$date").setValue(score)
+        database.child("${Constants.DATE_FORMATTER.format(date)}").setValue(score)
         finish()
     }
 
@@ -126,17 +186,6 @@ class TrackActivity : AppCompatActivity() {
             }
         })
     }
-//
-//    private fun calculateScore(): Int {
-//        return sleepScore(findViewById<RadioButton>(findViewById<RadioGroup>(R.id.sleep).checkedRadioButtonId).text) +
-//                exerciseScore(findViewById<RadioButton>(findViewById<RadioGroup>(R.id.exercise).checkedRadioButtonId).text) +
-//                nutritionScore(findViewById<RadioButton>(findViewById<RadioGroup>(R.id.nutrition).checkedRadioButtonId).text) +
-//                infectionScore(findViewById<RadioButton>(findViewById<RadioGroup>(R.id.infection).checkedRadioButtonId).text) +
-//                meditationScore(findViewById<RadioButton>(findViewById<RadioGroup>(R.id.meditation).checkedRadioButtonId).text) +
-//                overeatingScore(findViewById<RadioButton>(findViewById<RadioGroup>(R.id.overeating).checkedRadioButtonId).text) +
-//                mentalStressScore(findViewById<RadioButton>(findViewById<RadioGroup>(R.id.mentalStress).checkedRadioButtonId).text) +
-//                physicalStressScore(findViewById<RadioButton>(findViewById<RadioGroup>(R.id.physicalStress).checkedRadioButtonId).text)
-//    }
 
     private fun setDefaultSelections(): Unit {
         findViewById<RadioButton>(R.id.defaultSleep).isChecked = true;
@@ -158,6 +207,12 @@ class TrackActivity : AppCompatActivity() {
         overeatingInverseMap[score.overeatingScore]?.isChecked = true
         mentalStressInverseMap[score.mentalStressScore]?.isChecked = true
         physicalStressInverseMap[score.physicalStressScore]?.isChecked = true
+
+        if (score.sauna == 1) findViewById<CheckBox>(R.id.sauna).isChecked = true
+        if (score.physiotherapy == 1) findViewById<CheckBox>(R.id.physio).isChecked = true
+        if (score.massage == 1) findViewById<CheckBox>(R.id.massage).isChecked = true
+        if (score.pranayama == 1) findViewById<CheckBox>(R.id.pranayama).isChecked = true
+        if (score.accupuncture == 1) findViewById<CheckBox>(R.id.accupuncture).isChecked = true
     }
 
     private lateinit var sleepMap: Map<String, Int>

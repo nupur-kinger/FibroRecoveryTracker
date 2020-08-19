@@ -336,6 +336,64 @@
             </RadioGroup>
         </TableRow>
 
+        <TextView
+            android:id="@+id/addExtraText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:onClick="toggleExtras"
+            android:text="Add extra miles..."
+            android:textColor="@color/colorAccent" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/extraContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:id="@+id/extrasLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <CheckBox
+                    android:id="@+id/sauna"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Sauna" />
+
+                <CheckBox
+                    android:id="@+id/physio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Physiotherapy" />
+
+                <CheckBox
+                    android:id="@+id/massage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Massage" />
+
+                <CheckBox
+                    android:id="@+id/pranayama"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Pranayama" />
+
+                <CheckBox
+                    android:id="@+id/accupuncture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Accupuncture" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
         <Button
             android:id="@+id/submitBtn"
             android:layout_width="match_parent"
