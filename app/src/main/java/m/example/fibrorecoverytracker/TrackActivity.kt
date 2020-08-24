@@ -68,20 +68,10 @@ class TrackActivity : AppCompatActivity() {
             val dpd = DatePickerDialog(
                 this@TrackActivity,
                 DatePickerDialog.OnDateSetListener { dateText, year, monthOfYear, dayOfMonth ->
-
-                    val formattedDate =
-                        Constants.DATE_FORMATTER.format(
-                            LocalDateTime.of(
-                                year,
-                                monthOfYear,
-                                dayOfMonth,
-                                0,
-                                0
-                            )
-                        )
+                    date = LocalDate.of(year, monthOfYear, dayOfMonth )
+                    val formattedDate = Constants.DATE_FORMATTER.format(date)
                     it.dateText.text = SpannableStringBuilder(formattedDate)
                     fetchForDate(formattedDate)
-
                 },
                 today.year,
                 today.monthValue,

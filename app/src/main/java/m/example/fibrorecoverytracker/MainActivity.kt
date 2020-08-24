@@ -2,38 +2,114 @@ package m.example.fibrorecoverytracker
 
 import Score
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.DashPathEffect
 import android.os.Bundle
 import android.view.*
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
+import com.github.mikephil.charting.utils.Utils
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
     private var database: DatabaseReference = Firebase.database.reference
-    private var scoreMap = TreeMap<LocalDate, Score>(Collections.reverseOrder())
+    private var scoreMap = TreeMap<LocalDate, Score>()
     private var dates: ArrayList<LocalDate> = ArrayList()
     private lateinit var adapter: MyAdapter
+    private val initialScore = -1000f
+    private val startDate = LocalDate.now()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
 
+        initCharts()
         val recyclerView = findViewById<RecyclerView>(R.id.score_recycler_view)
         adapter = MyAdapter(dates, ::onDateClick)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
         getAllDates()
+    }
+
+    private fun initCharts() {
+        class DateValueFormatter : ValueFormatter() {
+            override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                return Constants.DATE_FORMATTER.format(dates[value.toInt()])
+            }
+        }
+
+        var lineChart = findViewById<LineChart>(R.id.lineChart);
+        lineChart.setTouchEnabled(true);
+        lineChart.setPinchZoom(true);
+
+        var xAxis = lineChart.xAxis
+        xAxis.valueFormatter = DateValueFormatter();
+        xAxis.position = XAxis.XAxisPosition.BOTTOM
+        xAxis.labelRotationAngle = 315F
+
+        val set1 = LineDataSet(ArrayList<Entry>(), "Progress Score")
+        set1.setDrawIcons(false)
+        set1.enableDashedLine(10f, 5f, 0f)
+        set1.enableDashedHighlightLine(10f, 5f, 0f)
+        set1.color = Color.DKGRAY
+        set1.setCircleColor(Color.DKGRAY)
+        set1.lineWidth = 1f
+        set1.circleRadius = 3f
+        set1.setDrawCircleHole(false)
+        set1.valueTextSize = 9f
+        set1.setDrawFilled(true)
+        set1.formLineWidth = 1f
+        set1.formLineDashEffect = DashPathEffect(floatArrayOf(10f, 5f), 0f)
+        set1.formSize = 15f
+        if (Utils.getSDKInt() >= 18) {
+            val drawable =
+                ContextCompat.getDrawable(this, android.R.color.holo_blue_light)
+            set1.fillDrawable = drawable
+        } else {
+            set1.fillColor = Color.DKGRAY
+        }
+        val dataSets: ArrayList<ILineDataSet> = ArrayList()
+        dataSets.add(set1)
+        val data = LineData(dataSets)
+        lineChart.data = data
+    }
+
+    private fun redrawCharts() {
+        val values: ArrayList<Entry> = ArrayList()
+        var score = initialScore
+        var index = 0
+
+        println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ${dates.size}")
+        for (entry in scoreMap) {
+            score += entry.value.total.toFloat()
+            values.add(Entry(index.toFloat(), score))
+            index++
+        }
+
+        var lineChart = findViewById<LineChart>(R.id.lineChart)
+        val dataSet = lineChart.data.getDataSetByIndex(0) as LineDataSet
+        dataSet.values = values
+        lineChart.data.notifyDataChanged()
+        lineChart.notifyDataSetChanged()
+        lineChart.invalidate()
     }
 
     fun track(view: View) {
@@ -69,21 +145,19 @@ class MainActivity : AppCompatActivity() {
                 val t: GenericTypeIndicator<Map<String, Score>> =
                     object : GenericTypeIndicator<Map<String, Score>>() {}
                 dataSnapshot.getValue(t)?.forEach {
-//                    println(it.key)
                     var date = LocalDate.parse(it.key, Constants.DATE_FORMATTER)
-                    var score = it.value as Score
-                    scoreMap[date] = score
+                    if (it.value is Score) {
+                        scoreMap[date] = it.value
+                    }
                 }
 
-//                var data = dataSnapshot.value as HashMap<String, Score>
-//                for (k in data.keys) {
-//                    scoreMap.put(k, data[k] as Score)
-//                }
-//                scoreMap = dataSnapshot.value as HashMap<String, Score>
                 dates.clear()
                 dates.addAll(scoreMap.keys.toTypedArray())
 
                 adapter.notifyDataSetChanged()
+
+                println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Redrawing chart")
+                redrawCharts()
             }
         }
 
@@ -129,4 +203,5 @@ class MainActivity : AppCompatActivity() {
 
         override fun getItemCount() = myDataset.size
     }
+
 }
