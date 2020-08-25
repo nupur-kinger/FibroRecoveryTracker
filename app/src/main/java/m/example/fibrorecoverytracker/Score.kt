@@ -14,8 +14,11 @@ data class Score(
     var pranayama: Int,
     var accupuncture: Int,
     var massage: Int,
+    var additional: Int,
+
+    var notes: String,
 
     var total: Int
 ) : Serializable {
-    constructor(): this(0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+    constructor(): this(0,0,0,0,0,0,0,0,0,0,0,0,0, 0,"", 0)
 }

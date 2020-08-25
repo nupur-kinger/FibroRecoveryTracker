@@ -18,6 +18,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_track.*
 import kotlinx.android.synthetic.main.activity_track.view.*
+import org.w3c.dom.Text
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -26,8 +27,8 @@ import java.util.*
 class TrackActivity : AppCompatActivity() {
 
     companion object {
-        val EXTRA_SCORE: String = "m.example.fibrorecoverytracker.EXTRA_SCORE"
-        val EXTRA_DATE = "m.example.fibrorecoverytracker.EXTRA_DATE"
+        const val EXTRA_SCORE: String = "m.example.fibrorecoverytracker.EXTRA_SCORE"
+        const val EXTRA_DATE = "m.example.fibrorecoverytracker.EXTRA_DATE"
     }
 
     private var database: DatabaseReference = Firebase.database.reference
@@ -37,9 +38,15 @@ class TrackActivity : AppCompatActivity() {
     private var shortAnimationDuration: Int = 0
     private var extrasVisible = false
 
+    private lateinit var sleepText: TextView
+    private lateinit var sleepSeekBar: SeekBar
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_track)
+
+        sleepText = findViewById(R.id.sleepText)
+        sleepSeekBar = findViewById(R.id.sleepSeekBar)
 
         database = Firebase.database.reference
         createConstants()
@@ -48,7 +55,7 @@ class TrackActivity : AppCompatActivity() {
         extraContent.visibility = View.GONE
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
-        var dateString: String = ""
+        var dateString = ""
         if (intent.hasExtra(EXTRA_DATE)) {
             // EDIT
             date = intent.getSerializableExtra(EXTRA_DATE) as LocalDate
@@ -61,26 +68,25 @@ class TrackActivity : AppCompatActivity() {
             fetchForDate(dateString)
         }
 
-        val dateText: EditText = findViewById<EditText>(R.id.dateText)
+        val dateText: EditText = findViewById(R.id.dateText)
         dateText.text = SpannableStringBuilder(dateString)
         dateText.setOnClickListener {
             val today = LocalDateTime.now()
             val dpd = DatePickerDialog(
                 this@TrackActivity,
                 DatePickerDialog.OnDateSetListener { dateText, year, monthOfYear, dayOfMonth ->
-                    date = LocalDate.of(year, monthOfYear, dayOfMonth )
+                    date = LocalDate.of(year, monthOfYear+1, dayOfMonth )
                     val formattedDate = Constants.DATE_FORMATTER.format(date)
                     it.dateText.text = SpannableStringBuilder(formattedDate)
                     fetchForDate(formattedDate)
                 },
                 today.year,
-                today.monthValue,
+                today.monthValue-1,
                 today.dayOfMonth
             )
 
             dpd.show()
         }
-
     }
 
     fun toggleExtras(view: View) {
@@ -128,9 +134,12 @@ class TrackActivity : AppCompatActivity() {
         val massageScore = if (findViewById<CheckBox>(R.id.massage).isChecked) 1 else 0
         val accupunctureScore = if (findViewById<CheckBox>(R.id.accupuncture).isChecked) 1 else 0
         val pranayamaScore = if (findViewById<CheckBox>(R.id.pranayama).isChecked) 1 else 0
+        val additionalScore = findViewById<EditText>(R.id.additionalScore).text.toString().toInt()
         val total =
             sleepScore + exerciseScore + nutritionScore + infectionScore + meditationScore + overeatingScore + mentalStressScore + physicalStressScore + saunaScore + physiotherapyScore
-            + massageScore + accupunctureScore + pranayamaScore
+            + massageScore + accupunctureScore + pranayamaScore + additionalScore
+
+        val notes = findViewById<EditText>(R.id.notes).text.toString()
 
         var score = Score(
             sleepScore,
@@ -146,10 +155,13 @@ class TrackActivity : AppCompatActivity() {
             pranayamaScore,
             accupunctureScore,
             massageScore,
+            additionalScore,
+            notes,
             total
         )
 
         database.child("${Constants.DATE_FORMATTER.format(date)}").setValue(score)
+        Toast.makeText(applicationContext, "Progress saved", Toast.LENGTH_LONG).show()
         finish()
     }
 
@@ -198,11 +210,22 @@ class TrackActivity : AppCompatActivity() {
         mentalStressInverseMap[score.mentalStressScore]?.isChecked = true
         physicalStressInverseMap[score.physicalStressScore]?.isChecked = true
 
+        sleepSeekBar.progress = when (score.sleepScore) {
+            -2 -> 0
+            2 -> 1
+            4 -> 2
+            else -> 3
+        }
+        showProgressTexts()
+
         if (score.sauna == 1) findViewById<CheckBox>(R.id.sauna).isChecked = true
         if (score.physiotherapy == 1) findViewById<CheckBox>(R.id.physio).isChecked = true
         if (score.massage == 1) findViewById<CheckBox>(R.id.massage).isChecked = true
         if (score.pranayama == 1) findViewById<CheckBox>(R.id.pranayama).isChecked = true
         if (score.accupuncture == 1) findViewById<CheckBox>(R.id.accupuncture).isChecked = true
+
+        if (score.notes.isNotEmpty()) findViewById<EditText>(R.id.notes).setText(score.notes)
+        findViewById<EditText>(R.id.additionalScore).setText(score.additional.toString())
     }
 
     private lateinit var sleepMap: Map<String, Int>
@@ -343,4 +366,17 @@ class TrackActivity : AppCompatActivity() {
     private fun mentalStressScore(s: CharSequence) = mentalStressMap.getOrDefault(s.toString(), 0)
     private fun physicalStressScore(s: CharSequence) =
         physicalStressMap.getOrDefault(s.toString(), 0)
+
+    private fun showProgressTexts() {
+        showSleepText()
+    }
+
+    private fun showSleepText() {
+        sleepText.text = when (sleepSeekBar.progress) {
+            0 -> "Less than 7 Hours"
+            1 -> ">7 Hours"
+            2 -> ">8 Hours"
+            else -> ">9 Hours"
+        }
+    }
 }

@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.os.Bundle
 import android.view.*
+import android.widget.CalendarView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -34,7 +35,6 @@ class MainActivity : AppCompatActivity() {
     private var dates: ArrayList<LocalDate> = ArrayList()
     private lateinit var adapter: MyAdapter
     private val initialScore = -1000f
-    private val startDate = LocalDate.now()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,8 +42,8 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(findViewById(R.id.toolbar))
 
         initCharts()
-        val recyclerView = findViewById<RecyclerView>(R.id.score_recycler_view)
         adapter = MyAdapter(dates, ::onDateClick)
+        val recyclerView = findViewById<RecyclerView>(R.id.score_recycler_view)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
         getAllDates()
@@ -97,7 +97,6 @@ class MainActivity : AppCompatActivity() {
         var score = initialScore
         var index = 0
 
-        println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ${dates.size}")
         for (entry in scoreMap) {
             score += entry.value.total.toFloat()
             values.add(Entry(index.toFloat(), score))
@@ -155,8 +154,6 @@ class MainActivity : AppCompatActivity() {
                 dates.addAll(scoreMap.keys.toTypedArray())
 
                 adapter.notifyDataSetChanged()
-
-                println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Redrawing chart")
                 redrawCharts()
             }
         }

@@ -31,6 +31,36 @@
                 android:inputType="date" />
         </LinearLayout>
 
+        <TableRow
+            style="@style/MetricPadding"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/MetricText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Sleep" />
+
+            <SeekBar
+                android:id="@+id/sleepSeekBar"
+                style="@style/Widget.AppCompat.SeekBar.Discrete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:max="3"
+                android:progress="0" />
+        </TableRow>
+
+        <TableRow
+            style="@style/MetricPadding"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/sleepText"
+                style="@style/MetricText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
         <TableRow style="@style/MetricPadding">
 
             <TextView
@@ -261,6 +291,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/YES" />
+
             </RadioGroup>
         </TableRow>
 
@@ -336,6 +367,32 @@
             </RadioGroup>
         </TableRow>
 
+        <TableRow style="@style/MetricPadding">
+            <TextView
+                style="@style/MetricText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Additional Score" />
+
+            <EditText
+                android:id="@+id/additionalScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="number"
+                android:text="0" />
+        </TableRow>
+
+        <EditText
+            android:id="@+id/notes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:gravity="start|top"
+            android:hint="Add notes..."
+            android:inputType="textMultiLine" />
+
         <TextView
             android:id="@+id/addExtraText"
             android:layout_width="wrap_content"
@@ -349,6 +406,7 @@
             android:id="@+id/extraContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:layout_weight="1">
 
             <LinearLayout
