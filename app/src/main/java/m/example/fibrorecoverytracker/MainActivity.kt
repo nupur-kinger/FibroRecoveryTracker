@@ -56,20 +56,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        var lineChart = findViewById<LineChart>(R.id.lineChart);
-        lineChart.setTouchEnabled(true);
-        lineChart.setPinchZoom(true);
+        var lineChart = findViewById<LineChart>(R.id.lineChart)
+        lineChart.setTouchEnabled(true)
+        lineChart.setPinchZoom(true)
+        lineChart.legend.isEnabled = false
 
         var xAxis = lineChart.xAxis
         xAxis.valueFormatter = DateValueFormatter();
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.labelRotationAngle = 315F
 
-        val set1 = LineDataSet(ArrayList<Entry>(), "Progress Score")
+        val set1 = LineDataSet(ArrayList<Entry>(), "")
         set1.setDrawIcons(false)
         set1.enableDashedLine(10f, 5f, 0f)
         set1.enableDashedHighlightLine(10f, 5f, 0f)
-        set1.color = Color.DKGRAY
+//        set1.color = Color.DKGRAY
         set1.setCircleColor(Color.DKGRAY)
         set1.lineWidth = 1f
         set1.circleRadius = 3f
@@ -79,9 +80,11 @@ class MainActivity : AppCompatActivity() {
         set1.formLineWidth = 1f
         set1.formLineDashEffect = DashPathEffect(floatArrayOf(10f, 5f), 0f)
         set1.formSize = 15f
+//        set1.fillAlpha = 100
+//        set1.fillColor = android.R.color.holo_purple
         if (Utils.getSDKInt() >= 18) {
             val drawable =
-                ContextCompat.getDrawable(this, android.R.color.holo_blue_light)
+                ContextCompat.getDrawable(this, android.R.color.holo_purple)
             set1.fillDrawable = drawable
         } else {
             set1.fillColor = Color.DKGRAY

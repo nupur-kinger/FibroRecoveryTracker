@@ -1,8 +1,6 @@
 package m.example.fibrorecoverytracker
 
 import Score
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.os.Bundle
@@ -16,13 +14,9 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.android.synthetic.main.activity_track.*
 import kotlinx.android.synthetic.main.activity_track.view.*
-import org.w3c.dom.Text
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
 
 class TrackActivity : AppCompatActivity() {
 
@@ -39,6 +33,7 @@ class TrackActivity : AppCompatActivity() {
     private var extrasVisible = false
 
     private lateinit var sleepText: TextView
+    private lateinit var additionalScoreTextBox: EditText
     private lateinit var sleepSeekBar: SeekBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,18 +70,20 @@ class TrackActivity : AppCompatActivity() {
             val dpd = DatePickerDialog(
                 this@TrackActivity,
                 DatePickerDialog.OnDateSetListener { dateText, year, monthOfYear, dayOfMonth ->
-                    date = LocalDate.of(year, monthOfYear+1, dayOfMonth )
+                    date = LocalDate.of(year, monthOfYear + 1, dayOfMonth)
                     val formattedDate = Constants.DATE_FORMATTER.format(date)
                     it.dateText.text = SpannableStringBuilder(formattedDate)
                     fetchForDate(formattedDate)
                 },
                 today.year,
-                today.monthValue-1,
+                today.monthValue - 1,
                 today.dayOfMonth
             )
 
             dpd.show()
         }
+
+        additionalScoreTextBox = findViewById(R.id.additionalScore)
     }
 
     fun toggleExtras(view: View) {
@@ -133,11 +130,13 @@ class TrackActivity : AppCompatActivity() {
         val physiotherapyScore = if (findViewById<CheckBox>(R.id.physio).isChecked) 1 else 0
         val massageScore = if (findViewById<CheckBox>(R.id.massage).isChecked) 1 else 0
         val accupunctureScore = if (findViewById<CheckBox>(R.id.accupuncture).isChecked) 1 else 0
+        val hotBathScore = if (findViewById<CheckBox>(R.id.hotBath).isChecked) 1 else 0
         val pranayamaScore = if (findViewById<CheckBox>(R.id.pranayama).isChecked) 1 else 0
-        val additionalScore = findViewById<EditText>(R.id.additionalScore).text.toString().toInt()
-        val total =
-            sleepScore + exerciseScore + nutritionScore + infectionScore + meditationScore + overeatingScore + mentalStressScore + physicalStressScore + saunaScore + physiotherapyScore
-            + massageScore + accupunctureScore + pranayamaScore + additionalScore
+        val additionalScoreString = additionalScoreTextBox.text.toString()
+        val additionalScore = if (additionalScoreString == "") 0 else additionalScoreString.toInt()
+        val essentialsScore = sleepScore + exerciseScore + nutritionScore + infectionScore + meditationScore + overeatingScore + mentalStressScore + physicalStressScore
+        val extrasScore = saunaScore + physiotherapyScore + massageScore + accupunctureScore + hotBathScore + pranayamaScore
+        val total: Int = essentialsScore + extrasScore + additionalScore
 
         val notes = findViewById<EditText>(R.id.notes).text.toString()
 
@@ -155,6 +154,7 @@ class TrackActivity : AppCompatActivity() {
             pranayamaScore,
             accupunctureScore,
             massageScore,
+            hotBathScore,
             additionalScore,
             notes,
             total
@@ -167,10 +167,6 @@ class TrackActivity : AppCompatActivity() {
 
     private fun selectedText(id: Int) =
         findViewById<RadioButton>(findViewById<RadioGroup>(id).checkedRadioButtonId).text
-
-    private fun setScore(key: String, value: Int) {
-        database.child(key).setValue(value)
-    }
 
     private fun fetchForDate(date: String) {
         database.child(date).addListenerForSingleValueEvent(object : ValueEventListener {
@@ -223,6 +219,7 @@ class TrackActivity : AppCompatActivity() {
         if (score.massage == 1) findViewById<CheckBox>(R.id.massage).isChecked = true
         if (score.pranayama == 1) findViewById<CheckBox>(R.id.pranayama).isChecked = true
         if (score.accupuncture == 1) findViewById<CheckBox>(R.id.accupuncture).isChecked = true
+        if (score.hotBath == 1) findViewById<CheckBox>(R.id.hotBath).isChecked = true
 
         if (score.notes.isNotEmpty()) findViewById<EditText>(R.id.notes).setText(score.notes)
         findViewById<EditText>(R.id.additionalScore).setText(score.additional.toString())
