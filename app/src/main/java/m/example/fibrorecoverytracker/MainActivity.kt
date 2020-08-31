@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.os.Bundle
 import android.view.*
-import android.widget.CalendarView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +24,9 @@ import com.github.mikephil.charting.utils.Utils
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import sun.bob.mcalendarview.MarkStyle
+import sun.bob.mcalendarview.listeners.OnDateClickListener
+import sun.bob.mcalendarview.vo.DateData
 import java.time.LocalDate
 import java.util.*
 import kotlin.collections.ArrayList
@@ -36,6 +38,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: MyAdapter
     private val initialScore = -1000f
 
+    private lateinit var calendar: sun.bob.mcalendarview.MCalendarView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -46,6 +50,14 @@ class MainActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.score_recycler_view)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        calendar = findViewById(R.id.calendar)
+        calendar.setOnDateClickListener(object : OnDateClickListener() {
+            override fun onDateClick(view: View?, date: DateData) {
+                onDateClick(LocalDate.of(date.year, date.month, date.day))
+            }
+        })
+
         getAllDates()
     }
 
@@ -114,6 +126,25 @@ class MainActivity : AppCompatActivity() {
         lineChart.invalidate()
     }
 
+    private fun updateCalendarView() {
+        for (entry in scoreMap) {
+            val date = entry.key
+            val score = entry.value.total
+            var dateData = DateData(date.year, date.monthValue, date.dayOfMonth)
+
+            var color =
+                when {
+                    score < 0 -> Color.RED
+                    score == 0 -> Color.WHITE
+                    else -> Color.GREEN
+                }
+            calendar.markDate(dateData.setMarkStyle(MarkStyle(MarkStyle.DOT, color)))
+            if (score >= 10) {
+                calendar.markDate(dateData.setMarkStyle(MarkStyle(MarkStyle.BACKGROUND, Color.GREEN)))
+            }
+        }
+    }
+
     fun track(view: View) {
         val intent = Intent(this, TrackActivity::class.java).apply {
 //            putExtra(EXTRA_MESSAGE, message)
@@ -156,6 +187,7 @@ class MainActivity : AppCompatActivity() {
                 dates.clear()
                 dates.addAll(scoreMap.keys.toTypedArray())
 
+                updateCalendarView()
                 adapter.notifyDataSetChanged()
                 redrawCharts()
             }

@@ -50,7 +50,7 @@ class TrackActivity : AppCompatActivity() {
         extraContent.visibility = View.GONE
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
-        var dateString = ""
+        var dateString: String
         if (intent.hasExtra(EXTRA_DATE)) {
             // EDIT
             date = intent.getSerializableExtra(EXTRA_DATE) as LocalDate
@@ -69,7 +69,7 @@ class TrackActivity : AppCompatActivity() {
             val today = LocalDateTime.now()
             val dpd = DatePickerDialog(
                 this@TrackActivity,
-                DatePickerDialog.OnDateSetListener { dateText, year, monthOfYear, dayOfMonth ->
+                DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
                     date = LocalDate.of(year, monthOfYear + 1, dayOfMonth)
                     val formattedDate = Constants.DATE_FORMATTER.format(date)
                     it.dateText.text = SpannableStringBuilder(formattedDate)
@@ -86,7 +86,7 @@ class TrackActivity : AppCompatActivity() {
         additionalScoreTextBox = findViewById(R.id.additionalScore)
     }
 
-    fun toggleExtras(view: View) {
+    fun toggleExtras() {
         if (extrasVisible) {
             collapseExtras()
         } else {
