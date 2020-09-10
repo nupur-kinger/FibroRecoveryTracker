@@ -35,7 +35,6 @@ class MainActivity : AppCompatActivity() {
     private var database: DatabaseReference = Firebase.database.reference
     private var scoreMap = TreeMap<LocalDate, Score>()
     private var dates: ArrayList<LocalDate> = ArrayList()
-    private lateinit var adapter: MyAdapter
     private val initialScore = -1000f
 
     private lateinit var calendar: sun.bob.mcalendarview.MCalendarView
@@ -46,10 +45,6 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(findViewById(R.id.toolbar))
 
         initCharts()
-        adapter = MyAdapter(dates, ::onDateClick)
-        val recyclerView = findViewById<RecyclerView>(R.id.score_recycler_view)
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
 
         calendar = findViewById(R.id.calendar)
         calendar.setOnDateClickListener(object : OnDateClickListener() {
@@ -82,7 +77,6 @@ class MainActivity : AppCompatActivity() {
         set1.setDrawIcons(false)
         set1.enableDashedLine(10f, 5f, 0f)
         set1.enableDashedHighlightLine(10f, 5f, 0f)
-//        set1.color = Color.DKGRAY
         set1.setCircleColor(Color.DKGRAY)
         set1.lineWidth = 1f
         set1.circleRadius = 3f
@@ -92,8 +86,6 @@ class MainActivity : AppCompatActivity() {
         set1.formLineWidth = 1f
         set1.formLineDashEffect = DashPathEffect(floatArrayOf(10f, 5f), 0f)
         set1.formSize = 15f
-//        set1.fillAlpha = 100
-//        set1.fillColor = android.R.color.holo_purple
         if (Utils.getSDKInt() >= 18) {
             val drawable =
                 ContextCompat.getDrawable(this, android.R.color.holo_purple)
@@ -188,7 +180,6 @@ class MainActivity : AppCompatActivity() {
                 dates.addAll(scoreMap.keys.toTypedArray())
 
                 updateCalendarView()
-                adapter.notifyDataSetChanged()
                 redrawCharts()
             }
         }
@@ -208,32 +199,4 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, "Oops! Something went wrong", Toast.LENGTH_LONG)
         }
     }
-
-    class MyAdapter(
-        private val myDataset: List<LocalDate>,
-        private val listener: (LocalDate) -> Unit
-    ) :
-        RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
-
-        class MyViewHolder(val view: View) : RecyclerView.ViewHolder(view)
-
-        override fun onCreateViewHolder(
-            parent: ViewGroup,
-            viewType: Int
-        ): MyViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.date_list_item, parent, false) as View
-            return MyViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-            val date = myDataset[position]
-            val dateTextHolder = holder.view.findViewById<TextView>(R.id.dateText)
-            dateTextHolder.text = Constants.DATE_FORMATTER.format(date)
-            dateTextHolder.setOnClickListener { listener(date) }
-        }
-
-        override fun getItemCount() = myDataset.size
-    }
-
 }

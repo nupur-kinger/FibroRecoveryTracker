@@ -19,6 +19,7 @@
 
     <style name="MetricText">
         <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="MetricPadding">
