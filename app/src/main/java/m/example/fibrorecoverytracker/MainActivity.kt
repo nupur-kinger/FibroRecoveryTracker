@@ -12,18 +12,19 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.github.mikephil.charting.utils.Utils
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import m.example.fibrorecoverytracker.databinding.ActivityMainBinding
 import sun.bob.mcalendarview.MarkStyle
 import sun.bob.mcalendarview.listeners.OnDateClickListener
 import sun.bob.mcalendarview.vo.DateData
@@ -39,9 +40,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var calendar: sun.bob.mcalendarview.MCalendarView
 
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         setSupportActionBar(findViewById(R.id.toolbar))
 
         initCharts()
@@ -57,6 +61,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initCharts() {
+        initLineChart()
+        initSleepBarChart()
+    }
+
+    private fun initSleepBarChart() {
+        class DateValueFormatter : ValueFormatter() {
+            override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                return Constants.DATE_FORMATTER.format(dates[value.toInt()])
+            }
+        }
+
+        var sleepBarChart = findViewById<BarChart>(R.id.sleepBarChart)
+        sleepBarChart.setTouchEnabled(true)
+        sleepBarChart.setPinchZoom(true)
+        sleepBarChart.legend.isEnabled = false
+
+        var xAxis = sleepBarChart.xAxis
+        xAxis.valueFormatter = DateValueFormatter();
+        xAxis.position = XAxis.XAxisPosition.BOTTOM
+        xAxis.labelRotationAngle = 315F
+
+        var dataSet1 = BarDataSet(mutableListOf(), "")
+        val dataSets: ArrayList<IBarDataSet> = ArrayList()
+        dataSets.add(dataSet1)
+        sleepBarChart.data = BarData(dataSets)
+    }
+
+    private fun initLineChart() {
         class DateValueFormatter : ValueFormatter() {
             override fun getAxisLabel(value: Float, axis: AxisBase?): String {
                 return Constants.DATE_FORMATTER.format(dates[value.toInt()])
@@ -100,6 +132,28 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun redrawCharts() {
+        redrawSleepBarChart()
+        redrawLineChart()
+    }
+
+    private fun redrawSleepBarChart() {
+        val values: ArrayList<BarEntry> = ArrayList()
+        var index = 0
+
+        for (entry in scoreMap) {
+            values.add(BarEntry(index.toFloat(), entry.value.sleepScore.toFloat()))
+            index++
+        }
+
+        var sleepBarChart = findViewById<BarChart>(R.id.sleepBarChart)
+        val dataSet = sleepBarChart.data.getDataSetByIndex(0) as BarDataSet
+        dataSet.values = values
+        sleepBarChart.data.notifyDataChanged()
+        sleepBarChart.notifyDataSetChanged()
+        sleepBarChart.invalidate()
+    }
+
+    private fun redrawLineChart() {
         val values: ArrayList<Entry> = ArrayList()
         var score = initialScore
         var index = 0
@@ -133,6 +187,8 @@ class MainActivity : AppCompatActivity() {
             calendar.markDate(dateData.setMarkStyle(MarkStyle(MarkStyle.DOT, color)))
             if (score >= 10) {
                 calendar.markDate(dateData.setMarkStyle(MarkStyle(MarkStyle.BACKGROUND, Color.GREEN)))
+            } else if (score <= -5) {
+                calendar.markDate(dateData.setMarkStyle(MarkStyle(MarkStyle.BACKGROUND, Color.RED)))
             }
         }
     }
