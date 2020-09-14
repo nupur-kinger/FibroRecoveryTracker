@@ -3,15 +3,14 @@ package m.example.fibrorecoverytracker
 import Score
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.DashPathEffect
 import android.os.Bundle
-import android.view.*
-import android.widget.TextView
+import android.util.DisplayMetrics
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.AxisBase
@@ -24,6 +23,7 @@ import com.github.mikephil.charting.utils.Utils
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.content_main.view.*
 import m.example.fibrorecoverytracker.databinding.ActivityMainBinding
 import sun.bob.mcalendarview.MarkStyle
 import sun.bob.mcalendarview.listeners.OnDateClickListener
@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     private val initialScore = -1000f
 
     private lateinit var calendar: sun.bob.mcalendarview.MCalendarView
+    private var chartsList = mutableListOf<View>()
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,8 +61,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initCharts() {
+        chartsList.add(findViewById(R.id.lineChart))
+        chartsList.add(findViewById(R.id.sleepBarChart))
+
         initLineChart()
         initSleepBarChart()
+
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        val width: Int = displayMetrics.widthPixels
+        for (chart in chartsList) {
+            chart.layoutParams.width = width - width/6
+        }
     }
 
     private fun initSleepBarChart() {
@@ -75,6 +86,7 @@ class MainActivity : AppCompatActivity() {
         sleepBarChart.setTouchEnabled(true)
         sleepBarChart.setPinchZoom(true)
         sleepBarChart.legend.isEnabled = false
+        sleepBarChart.axisRight.setDrawLabels(false)
 
         var xAxis = sleepBarChart.xAxis
         xAxis.valueFormatter = DateValueFormatter();
@@ -98,6 +110,7 @@ class MainActivity : AppCompatActivity() {
         lineChart.setTouchEnabled(true)
         lineChart.setPinchZoom(true)
         lineChart.legend.isEnabled = false
+        lineChart.axisRight.setDrawLabels(false)
 
         var xAxis = lineChart.xAxis
         xAxis.valueFormatter = DateValueFormatter();
@@ -114,9 +127,9 @@ class MainActivity : AppCompatActivity() {
         set1.setDrawCircleHole(false)
         set1.valueTextSize = 9f
         set1.setDrawFilled(true)
-        set1.formLineWidth = 1f
-        set1.formLineDashEffect = DashPathEffect(floatArrayOf(10f, 5f), 0f)
-        set1.formSize = 15f
+//        set1.formLineWidth = 1f
+//        set1.formLineDashEffect = DashPathEffect(floatArrayOf(10f, 5f), 0f)
+//        set1.formSize = 15f
         if (Utils.getSDKInt() >= 18) {
             val drawable =
                 ContextCompat.getDrawable(this, android.R.color.holo_purple)
@@ -185,7 +198,14 @@ class MainActivity : AppCompatActivity() {
                 }
             calendar.markDate(dateData.setMarkStyle(MarkStyle(MarkStyle.DOT, color)))
             if (score >= 10) {
-                calendar.markDate(dateData.setMarkStyle(MarkStyle(MarkStyle.BACKGROUND, Color.GREEN)))
+                calendar.markDate(
+                    dateData.setMarkStyle(
+                        MarkStyle(
+                            MarkStyle.BACKGROUND,
+                            Color.GREEN
+                        )
+                    )
+                )
             } else if (score <= -5) {
                 calendar.markDate(dateData.setMarkStyle(MarkStyle(MarkStyle.BACKGROUND, Color.RED)))
             }
