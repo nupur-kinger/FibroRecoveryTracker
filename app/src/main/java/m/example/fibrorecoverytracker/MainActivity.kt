@@ -39,7 +39,6 @@ class MainActivity : AppCompatActivity() {
     private val initialScore = -1000f
 
     private lateinit var calendar: sun.bob.mcalendarview.MCalendarView
-
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
