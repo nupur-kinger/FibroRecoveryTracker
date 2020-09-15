@@ -23,7 +23,6 @@ import com.github.mikephil.charting.utils.Utils
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.android.synthetic.main.content_main.view.*
 import m.example.fibrorecoverytracker.databinding.ActivityMainBinding
 import sun.bob.mcalendarview.MarkStyle
 import sun.bob.mcalendarview.listeners.OnDateClickListener
@@ -264,10 +263,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun onDateClick(date: LocalDate) {
         if (scoreMap.containsKey(date)) {
-            var score: Score = scoreMap[date]!!
             val intent = Intent(this, TrackActivity::class.java).apply {
                 putExtra(TrackActivity.EXTRA_DATE, date)
-                putExtra(TrackActivity.EXTRA_SCORE, scoreMap.get(date))
+                putExtra(TrackActivity.EXTRA_SCORE, scoreMap[date])
             }
             startActivity(intent)
         } else {
