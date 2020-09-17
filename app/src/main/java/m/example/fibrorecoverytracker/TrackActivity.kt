@@ -68,8 +68,6 @@ class TrackActivity : AppCompatActivity() {
         physicalStressBar.setMetric(PhysicalStress::class.java)
 
         database = Firebase.database.reference
-        addExtraText = findViewById<View>(R.id.addExtraText)
-        binding.extraMilesChips.visibility = View.GONE
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
         var dateString: String
@@ -106,37 +104,6 @@ class TrackActivity : AppCompatActivity() {
         }
 
         additionalScoreTextBox = findViewById(R.id.additionalScore)
-    }
-
-    fun toggleExtras(view: View) {
-        if (extrasVisible) {
-            collapseExtras()
-        } else {
-            expandExtras()
-        }
-        extrasVisible = !extrasVisible
-    }
-
-    private fun expandExtras() {
-        binding.extraMilesChips.apply {
-            alpha = 0f
-            visibility = View.VISIBLE
-            animate()
-                .alpha(1f)
-                .setDuration(shortAnimationDuration.toLong())
-                .setListener(null)
-        }
-    }
-
-    private fun collapseExtras() {
-        binding.extraMilesChips.apply {
-            alpha = 1f
-            visibility = View.GONE
-            animate()
-                .alpha(0f)
-                .setDuration(shortAnimationDuration.toLong())
-                .setListener(null)
-        }
     }
 
     fun save(view: View) {

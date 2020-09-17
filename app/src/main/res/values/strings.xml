@@ -33,4 +33,12 @@
     <string name="HAPPY"><![CDATA[Happy]]></string>
     <string name="HIGH"><![CDATA[High]]></string>
 
+    <string-array name="periods_array">
+        <item>7 D</item>
+        <item>15 D</item>
+        <item>1 M</item>
+        <item>2 M</item>
+        <item>3 M</item>
+        <item>1 Y</item>
+    </string-array>
 </resources>

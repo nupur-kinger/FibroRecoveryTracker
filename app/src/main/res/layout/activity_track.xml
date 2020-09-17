@@ -194,15 +194,6 @@
             android:hint="Add notes..."
             android:inputType="textMultiLine" />
 
-        <TextView
-            android:id="@+id/addExtraText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:onClick="toggleExtras"
-            android:text="Add extra miles..."
-            android:textColor="@color/colorPrimaryDark" />
-
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/extraMilesChips"
             android:layout_width="match_parent"

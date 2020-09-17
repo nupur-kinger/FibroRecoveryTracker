@@ -9,8 +9,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.viewpager2.widget.ViewPager2
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.AxisBase
@@ -20,22 +22,29 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.github.mikephil.charting.utils.Utils
+import com.google.android.material.tabs.TabLayout
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import m.example.fibrorecoverytracker.adapter.MainFragmentPagerAdapter
 import m.example.fibrorecoverytracker.databinding.ActivityMainBinding
+import m.example.fibrorecoverytracker.listener.ScoreChangeListener
 import sun.bob.mcalendarview.MarkStyle
 import sun.bob.mcalendarview.listeners.OnDateClickListener
 import sun.bob.mcalendarview.vo.DateData
 import java.time.LocalDate
 import java.util.*
 import kotlin.collections.ArrayList
+import androidx.activity.viewModels
+import com.google.android.material.tabs.TabLayoutMediator
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ScoreChangeListener {
+    private val model: ScoreModel by viewModels()
+
     private var database: DatabaseReference = Firebase.database.reference
     private var scoreMap = TreeMap<LocalDate, Score>()
     private var dates: ArrayList<LocalDate> = ArrayList()
-    private val initialScore = -1000f
+    private val initialScore = 0F
 
     private lateinit var calendar: sun.bob.mcalendarview.MCalendarView
     private var chartsList = mutableListOf<View>()
@@ -47,16 +56,28 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(findViewById(R.id.toolbar))
 
-        initCharts()
+        val viewPager = findViewById<ViewPager2>(R.id.pager)
+        viewPager.adapter = MainFragmentPagerAdapter(supportFragmentManager, lifecycle, model)
+        val tabLayout = findViewById<TabLayout>(R.id.tab_layout)
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.text = if (position == 0) "Journey" else "Calendar"
+//            tab.text = "OBJECT ${(position + 1)}"
+            viewPager.setCurrentItem(tab.position, true)
+        }.attach()
 
-        calendar = findViewById(R.id.calendar)
-        calendar.setOnDateClickListener(object : OnDateClickListener() {
-            override fun onDateClick(view: View?, date: DateData) {
-                onDateClick(LocalDate.of(date.year, date.month, date.day))
-            }
-        })
+//        model.addListener(this)
+        model.getScores()
 
-        getAllDates()
+//        initCharts()
+//
+//        calendar = findViewById(R.id.calendar)
+//        calendar.setOnDateClickListener(object : OnDateClickListener() {
+//            override fun onDateClick(view: View?, date: DateData) {
+//                onDateClick(LocalDate.of(date.year, date.month, date.day))
+//            }
+//        })
+//
+//        getAllDates()
     }
 
     private fun initCharts() {
@@ -143,8 +164,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun redrawCharts() {
-        redrawSleepBarChart()
-        redrawLineChart()
+//        redrawSleepBarChart()
+//        redrawLineChart()
     }
 
     private fun redrawSleepBarChart() {
@@ -213,7 +234,6 @@ class MainActivity : AppCompatActivity() {
 
     fun track(view: View) {
         val intent = Intent(this, TrackActivity::class.java).apply {
-//            putExtra(EXTRA_MESSAGE, message)
         }
         startActivity(intent)
     }
@@ -259,6 +279,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         database.addValueEventListener(progressListener)
+    }
+
+    override fun onScoreChange(scoreMap: TreeMap<LocalDate, Score>) {
+        this.scoreMap = scoreMap
+        redrawCharts()
     }
 
     private fun onDateClick(date: LocalDate) {
