@@ -30,39 +30,42 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checkable="true"
-            android:text="15D"/>
+            android:text="15D" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip1m"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checkable="true"
-            android:text="1M"/>
+            android:text="1M" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip2m"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checkable="true"
-            android:text="2M"/>
+            android:text="2M" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip3m"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checkable="true"
-            android:text="3M"/>
+            android:text="3M" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipOverall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checkable="true"
+            android:text="Overall" />
     </com.google.android.material.chip.ChipGroup>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/chartsCard"
+        style="@style/JourneyCard"
         android:layout_width="match_parent"
         android:layout_height="280dp"
-        android:layout_margin="7dp"
-        android:background="#FFFFE0"
-        android:elevation="7dp"
-        app:cardCornerRadius="6dp"
-        app:cardPreventCornerOverlap="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/periodChips">
 
@@ -120,28 +123,106 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/scoreReportsCard"
+        style="@style/JourneyCard"
         android:layout_width="match_parent"
-        android:layout_height="280dp"
-        android:layout_margin="7dp"
-        android:background="#FFFFE0"
-        android:elevation="7dp"
-        app:cardCornerRadius="6dp"
-        app:cardPreventCornerOverlap="false"
+        android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/chartsCard">
 
-        <RelativeLayout
-            android:layout_width="fill_parent"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/relativeLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:padding="10dp">
 
             <TextView
+                android:id="@+id/scoreReportsTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:layout_marginBottom="5dp"
-                android:text="Average Score Reports" />
-        </RelativeLayout>
+                android:text="Average Score Reports"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/avgProgressLabel"
+                style="@style/ScoreReportsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Average Progress"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/scoreReportsTitle" />
+            <TextView
+                android:id="@+id/avgProgress"
+                style="@style/ScoreReportsValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toEndOf="@id/avgProgressLabel"
+                app:layout_constraintTop_toBottomOf="@+id/scoreReportsTitle" />
+
+            <TextView
+                android:id="@+id/avgSleepLabel"
+                style="@style/ScoreReportsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Average Sleep"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/avgProgressLabel" />
+            <TextView
+                android:id="@+id/avgSleep"
+                style="@style/ScoreReportsValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toEndOf="@id/avgSleepLabel"
+                app:layout_constraintTop_toBottomOf="@+id/avgProgressLabel" />
+
+            <TextView
+                android:id="@+id/avgExerciseLabel"
+                style="@style/ScoreReportsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Average Exercise"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/avgSleepLabel" />
+            <TextView
+                android:id="@+id/avgExercise"
+                style="@style/ScoreReportsValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toEndOf="@id/avgExerciseLabel"
+                app:layout_constraintTop_toBottomOf="@id/avgSleepLabel" />
+
+            <TextView
+                android:id="@+id/avgStressLabel"
+                style="@style/ScoreReportsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Average Stress"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/avgExerciseLabel" />
+            <TextView
+                android:id="@+id/avgStress"
+                style="@style/ScoreReportsValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toEndOf="@id/avgStressLabel"
+                app:layout_constraintTop_toBottomOf="@id/avgExerciseLabel" />
+
+            <TextView
+                android:id="@+id/avgNutritionLabel"
+                style="@style/ScoreReportsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Average Nutrition"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/avgStressLabel" />
+            <TextView
+                android:id="@+id/avgNutrition"
+                style="@style/ScoreReportsValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toEndOf="@id/avgNutritionLabel"
+                app:layout_constraintTop_toBottomOf="@id/avgStressLabel" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

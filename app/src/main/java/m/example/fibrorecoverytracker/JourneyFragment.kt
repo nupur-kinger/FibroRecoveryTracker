@@ -10,6 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -22,9 +24,15 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.github.mikephil.charting.utils.Utils
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import kotlinx.android.synthetic.main.fragment_journey.*
+import m.example.fibrorecoverytracker.databinding.FragmentJourneyBinding
 import m.example.fibrorecoverytracker.listener.ScoreChangeListener
+import java.text.DecimalFormat
 import java.time.LocalDate
 import java.util.*
+import java.util.stream.Collectors
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -39,6 +47,7 @@ private const val ARG_PARAM2 = "param2"
 class JourneyFragment : Fragment() {
     private val model: ScoreModel by activityViewModels()
 
+    private var overallScoreMap = TreeMap<LocalDate, Score>()
     private var scoreMap = TreeMap<LocalDate, Score>()
     private var dates: ArrayList<LocalDate> = ArrayList()
     private var chartsList = mutableListOf<View>()
@@ -46,6 +55,13 @@ class JourneyFragment : Fragment() {
 
     private lateinit var sleepBarChart: BarChart
     private lateinit var overallProgressLineChart: LineChart
+    private lateinit var avgProgress: TextView
+    private lateinit var avgSleep: TextView
+    private lateinit var avgExercise: TextView
+    private lateinit var avgStress: TextView
+    private lateinit var avgNutrition: TextView
+    private lateinit var periodChips: ChipGroup
+    private lateinit var binding: FragmentJourneyBinding
 
     // TODO: Rename and change types of parameters
     private var param1: String? = null
@@ -69,26 +85,100 @@ class JourneyFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initCharts(view)
+
+        // Initialize all lateinit vars
+        binding = FragmentJourneyBinding.bind(view)
+        overallProgressLineChart = view.findViewById(R.id.overallProgressLineChart)
+        sleepBarChart = view.findViewById(R.id.sleepBarChart)
+        avgProgress = view.findViewById(R.id.avgProgress)
+        avgSleep = view.findViewById(R.id.avgSleep)
+        avgExercise = view.findViewById(R.id.avgExercise)
+        avgStress = view.findViewById(R.id.avgStress)
+        avgNutrition = view.findViewById(R.id.avgNutrition)
+        periodChips = binding.periodChips
+
+        initCharts()
+        initPeriods()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         model.scoreMap.observe(viewLifecycleOwner, Observer<TreeMap<LocalDate, Score>> { scoreMap ->
             run {
-                this.scoreMap = scoreMap
-                dates.clear()
-                dates.addAll(scoreMap.keys.toTypedArray())
-                redrawCharts()
+                this.overallScoreMap = scoreMap
+                refreshScores()
             }
         })
-        redrawCharts()
+        refreshScores()
     }
 
-    private fun initCharts(rootView: View) {
-        overallProgressLineChart = rootView.findViewById(R.id.overallProgressLineChart)
-        sleepBarChart = rootView.findViewById(R.id.sleepBarChart)
+    private fun refreshScores() {
+        filterForPeriod()
+        dates.clear()
+        dates.addAll(this.scoreMap.keys.toTypedArray())
 
+        redrawCharts()
+        calculateScoreReports()
+    }
+
+    private fun filterForPeriod() {
+        val checkedChipId = binding.periodChips.checkedChipId
+        if (checkedChipId == binding.chipOverall.id) {
+            scoreMap = overallScoreMap
+            return
+        }
+        val afterDate = when (checkedChipId) {
+            binding.chip7d.id -> LocalDate.now().minusDays(7)
+            binding.chip15d.id -> LocalDate.now().minusDays(15)
+            binding.chip1m.id -> LocalDate.now().minusMonths(1)
+            binding.chip2m.id -> LocalDate.now().minusMonths(2)
+            else -> LocalDate.now().minusMonths(3)
+        }
+
+        scoreMap = TreeMap()
+        for (entry in overallScoreMap) {
+            if (entry.key.isAfter(afterDate)) {
+                scoreMap[entry.key] = entry.value
+            }
+        }
+    }
+
+    private fun calculateScoreReports() {
+        setScore(percentage(scoreMap.values.map { score -> score.sleepScore }, Sleep.LESS_THAN_7.min(), Sleep.LESS_THAN_7.max()), avgSleep)
+        setScore(percentage(scoreMap.values.map { score -> score.exerciseScore }, Exercise.NONE.min(), Exercise.NONE.max()), avgExercise)
+        setScore(percentage(scoreMap.values.map { score -> score.mentalStressScore }, MentalStress.HAPPY.min(), MentalStress.HAPPY.max()), avgStress)
+        setScore(percentage(scoreMap.values.map { score -> score.nutritionScore }, Nutrition.BAD.min(), Nutrition.BAD.max()), avgNutrition)
+
+        val avgProgressScore = average(scoreMap.values.map { score -> score.total })
+        val color = when(avgProgressScore) {
+            in Double.MIN_VALUE..Constants.POOR_PROGRESS -> "#FF0000"
+            in Constants.POOR_PROGRESS..Constants.GOOD_PROGRESS -> "#E1AC00"
+            else -> "#00FF00"
+        }
+        avgProgress.setTextColor(Color.parseColor(color))
+        avgProgress.text = "${DECIMAL_FORMAT.format(avgProgressScore)}"
+    }
+
+    private fun setScore(score: Double, textView: TextView) {
+        val color = when(score) {
+            in 0.0..Constants.POOR_SCORE -> "#FF0000"
+            in Constants.POOR_SCORE..Constants.GOOD_SCORE -> "#E1AC00"
+            else -> "#00FF00"
+        }
+        textView.setTextColor(Color.parseColor(color))
+        textView.text = "${DECIMAL_FORMAT.format(score)}%"
+    }
+
+    private fun percentage(scores: List<Int>, min: Int, max: Int): Double {
+        val avg = scores.stream().collect(Collectors.averagingInt { num -> num.toInt() })
+        val diff = 0-min
+        return ((avg+diff)/(max+diff))*100
+    }
+
+    private fun average(scores: List<Int>): Double =
+        scores.stream().collect(Collectors.averagingInt { num -> num.toInt() })
+
+    private fun initCharts() {
         chartsList.add(overallProgressLineChart)
         chartsList.add(sleepBarChart)
 
@@ -99,24 +189,25 @@ class JourneyFragment : Fragment() {
         activity?.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
         val width: Int = displayMetrics.widthPixels
         for (chart in chartsList) {
-            chart.layoutParams.width = width - width/8
+            chart.layoutParams.width = width - width / 8
+        }
+    }
+
+    private fun initPeriods() {
+        binding.chipOverall.isChecked = true
+        binding.periodChips.setOnCheckedChangeListener { _, _ ->
+            refreshScores()
         }
     }
 
     private fun initSleepBarChart() {
-        class DateValueFormatter : ValueFormatter() {
-            override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-                return Constants.DATE_FORMATTER.format(dates[value.toInt()])
-            }
-        }
-
         sleepBarChart.setTouchEnabled(true)
         sleepBarChart.setPinchZoom(true)
         sleepBarChart.legend.isEnabled = false
         sleepBarChart.axisRight.setDrawLabels(false)
 
         var xAxis = sleepBarChart.xAxis
-        xAxis.valueFormatter = DateValueFormatter();
+        xAxis.valueFormatter = DateValueFormatter(dates)
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.labelRotationAngle = 315F
 
@@ -127,19 +218,13 @@ class JourneyFragment : Fragment() {
     }
 
     private fun initLineChart() {
-        class DateValueFormatter : ValueFormatter() {
-            override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-                return Constants.DATE_FORMATTER.format(dates[value.toInt()])
-            }
-        }
-
         overallProgressLineChart.setTouchEnabled(true)
         overallProgressLineChart.setPinchZoom(true)
         overallProgressLineChart.legend.isEnabled = false
         overallProgressLineChart.axisRight.setDrawLabels(false)
 
         var xAxis = overallProgressLineChart.xAxis
-        xAxis.valueFormatter = DateValueFormatter();
+        xAxis.valueFormatter = DateValueFormatter(dates);
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.labelRotationAngle = 315F
 
@@ -158,7 +243,7 @@ class JourneyFragment : Fragment() {
 //        set1.formSize = 15f
         if (Utils.getSDKInt() >= 18) {
             val drawable =
-                ContextCompat.getDrawable(context!!, android.R.color.holo_purple)
+                ContextCompat.getDrawable(context!!, android.R.color.holo_blue_light)
             set1.fillDrawable = drawable
         } else {
             set1.fillColor = Color.DKGRAY
@@ -175,6 +260,7 @@ class JourneyFragment : Fragment() {
     }
 
     private fun redrawSleepBarChart() {
+        sleepBarChart.xAxis.valueFormatter = DateValueFormatter(dates)
         val values: ArrayList<BarEntry> = ArrayList()
         var index = 0
 
@@ -191,6 +277,7 @@ class JourneyFragment : Fragment() {
     }
 
     private fun redrawLineChart() {
+        sleepBarChart.xAxis.valueFormatter = DateValueFormatter(dates)
         val values: ArrayList<Entry> = ArrayList()
         var score = initialScore
         var index = 0
@@ -209,6 +296,8 @@ class JourneyFragment : Fragment() {
     }
 
     companion object {
+        private val DECIMAL_FORMAT = DecimalFormat("#.##")
+
         /**
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.
@@ -226,5 +315,11 @@ class JourneyFragment : Fragment() {
                     putString(ARG_PARAM2, param2)
                 }
             }
+    }
+
+    class DateValueFormatter(private val datesArray: ArrayList<LocalDate>) : ValueFormatter() {
+        override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+            return Constants.DATE_FORMATTER.format(datesArray[value.toInt()])
+        }
     }
 }
