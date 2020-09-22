@@ -7,6 +7,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import m.example.fibrorecoverytracker.CalendarFragment
 import m.example.fibrorecoverytracker.JourneyFragment
 import m.example.fibrorecoverytracker.ScoreModel
+import m.example.fibrorecoverytracker.TestFragment
 
 class MainFragmentPagerAdapter(fm: FragmentManager, lifecycle: Lifecycle, private val model: ScoreModel) :
     FragmentStateAdapter(fm, lifecycle) {

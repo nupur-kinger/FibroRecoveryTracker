@@ -277,7 +277,7 @@ class JourneyFragment : Fragment() {
     }
 
     private fun redrawLineChart() {
-        sleepBarChart.xAxis.valueFormatter = DateValueFormatter(dates)
+        overallProgressLineChart.xAxis.valueFormatter = DateValueFormatter(dates)
         val values: ArrayList<Entry> = ArrayList()
         var score = initialScore
         var index = 0
