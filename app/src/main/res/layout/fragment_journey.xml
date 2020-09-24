@@ -152,6 +152,7 @@
                 android:text="Average Progress"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/scoreReportsTitle" />
+
             <TextView
                 android:id="@+id/avgProgress"
                 style="@style/ScoreReportsValue"
@@ -168,6 +169,7 @@
                 android:text="Average Sleep"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/avgProgressLabel" />
+
             <TextView
                 android:id="@+id/avgSleep"
                 style="@style/ScoreReportsValue"
@@ -184,6 +186,7 @@
                 android:text="Average Exercise"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/avgSleepLabel" />
+
             <TextView
                 android:id="@+id/avgExercise"
                 style="@style/ScoreReportsValue"
@@ -200,6 +203,7 @@
                 android:text="Average Stress"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/avgExerciseLabel" />
+
             <TextView
                 android:id="@+id/avgStress"
                 style="@style/ScoreReportsValue"
@@ -216,6 +220,7 @@
                 android:text="Average Nutrition"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/avgStressLabel" />
+
             <TextView
                 android:id="@+id/avgNutrition"
                 style="@style/ScoreReportsValue"
