@@ -33,17 +33,6 @@ class MainActivity : AppCompatActivity() {
             viewPager.setCurrentItem(tab.position, true)
         }.attach()
 
-//        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-//            override fun onTabSelected(tab: TabLayout.Tab) {
-//                //load fragment or do whatever you want
-//                val fragment: Fragment = if (tab.position == 1) JourneyFragment() else CalendarFragment()
-//                supportFragmentManager.beginTransaction().replace(R.id.tabContainer, fragment).commit()
-//            }
-//
-//            override fun onTabUnselected(tab: TabLayout.Tab) {}
-//            override fun onTabReselected(tab: TabLayout.Tab) {}
-//        })
-
         model.getScores()
     }
 
