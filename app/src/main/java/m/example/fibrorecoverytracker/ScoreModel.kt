@@ -16,40 +16,43 @@ class ScoreModel : ViewModel() {
         MutableLiveData<TreeMap<LocalDate, Score>>()
     }
 
-    private var database: DatabaseReference = Firebase.database.reference
+    private var database: DatabaseReference = Firebase.database.reference.child("users")
     private val listeners = mutableListOf<ScoreChangeListener>()
     private var dates: ArrayList<LocalDate> = ArrayList()
 
-    fun addListener(listener: ScoreChangeListener) {
-        listeners.add(listener)
-    }
+    fun getScores(userId: String, callback: ()->Unit) {
+        val userDataRef = database.child(userId)
 
-    fun getScores() {
         val progressListener = object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
                 TODO("Not yet implemented")
             }
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val scores = TreeMap<LocalDate, Score>()
-                val t: GenericTypeIndicator<Map<String, Score>> =
-                    object : GenericTypeIndicator<Map<String, Score>>() {}
-                dataSnapshot.getValue(t)?.forEach {
-                    var date = LocalDate.parse(it.key, Constants.DATE_FORMATTER)
-                    if (it.value is Score) {
-                        scores[date] = it.value
+                if (dataSnapshot.value != null) {
+                    val scores = TreeMap<LocalDate, Score>()
+                    val t: GenericTypeIndicator<Map<String, Score>> =
+                        object : GenericTypeIndicator<Map<String, Score>>() {}
+                    dataSnapshot.getValue(t)?.forEach {
+                        var date = LocalDate.parse(it.key, Constants.DATE_FORMATTER)
+                        if (it.value is Score) {
+                            scores[date] = it.value
+                        }
                     }
+
+                    dates.clear()
+                    dates.addAll(scores.keys.toTypedArray())
+
+                    scoreMap.value = scores
+                    notifyScoreChange()
+                    callback()
+                } else {
+                    userDataRef.child("${Constants.DATE_FORMATTER.format(LocalDate.now())}").setValue(null)
                 }
-
-                dates.clear()
-                dates.addAll(scores.keys.toTypedArray())
-
-                scoreMap.value = scores
-                notifyScoreChange()
             }
         }
 
-        database.addValueEventListener(progressListener)
+        userDataRef.addValueEventListener(progressListener)
     }
 
     private fun notifyScoreChange() {

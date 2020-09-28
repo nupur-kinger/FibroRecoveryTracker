@@ -26,6 +26,9 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.github.mikephil.charting.utils.Utils
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.fragment_journey.*
 import m.example.fibrorecoverytracker.databinding.FragmentJourneyBinding
 import m.example.fibrorecoverytracker.listener.ScoreChangeListener
@@ -45,6 +48,7 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class JourneyFragment : Fragment() {
+    private var auth = Firebase.auth
     private val model: ScoreModel by activityViewModels()
 
     private var overallScoreMap = TreeMap<LocalDate, Score>()
@@ -62,6 +66,7 @@ class JourneyFragment : Fragment() {
     private lateinit var avgNutrition: TextView
     private lateinit var periodChips: ChipGroup
     private lateinit var binding: FragmentJourneyBinding
+    private var uid: String? = null
 
     // TODO: Rename and change types of parameters
     private var param1: String? = null
@@ -103,13 +108,18 @@ class JourneyFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        model.scoreMap.observe(viewLifecycleOwner, Observer<TreeMap<LocalDate, Score>> { scoreMap ->
-            run {
-                this.overallScoreMap = scoreMap
-                refreshScores()
-            }
-        })
-        refreshScores()
+        uid = auth.currentUser?.uid
+        if (uid != null) {
+            model.scoreMap.observe(
+                viewLifecycleOwner,
+                Observer<TreeMap<LocalDate, Score>> { scoreMap ->
+                    run {
+                        this.overallScoreMap = scoreMap
+                        refreshScores()
+                    }
+                })
+            refreshScores()
+        }
     }
 
     private fun refreshScores() {
@@ -144,6 +154,9 @@ class JourneyFragment : Fragment() {
     }
 
     private fun calculateScoreReports() {
+        if (scoreMap.isEmpty()) {
+            return
+        }
         setScore(percentage(scoreMap.values.map { score -> score.sleepScore }, Sleep.LESS_THAN_7.min(), Sleep.LESS_THAN_7.max()), avgSleep)
         setScore(percentage(scoreMap.values.map { score -> score.exerciseScore }, Exercise.NONE.min(), Exercise.NONE.max()), avgExercise)
         setScore(percentage(scoreMap.values.map { score -> score.mentalStressScore }, MentalStress.HAPPY.min(), MentalStress.HAPPY.max()), avgStress)

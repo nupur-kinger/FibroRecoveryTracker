@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.view.View
 import android.widget.*
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -19,6 +20,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class TrackActivity : AppCompatActivity() {
+    private val model: TrackActivityModel by viewModels()
 
     companion object {
         const val EXTRA_SCORE: String = "m.example.fibrorecoverytracker.EXTRA_SCORE"
@@ -26,13 +28,11 @@ class TrackActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityTrackBinding
+    private lateinit var date: LocalDate
+    private lateinit var uid: String
 
     private var database: DatabaseReference = Firebase.database.reference
-    private lateinit var date: LocalDate
-    private lateinit var extraContent: View
-    private lateinit var addExtraText: View
     private var shortAnimationDuration: Int = 0
-    private var extrasVisible = false
 
     private lateinit var additionalScoreTextBox: EditText
     private lateinit var sleepBar: LabelledSeekBar<Sleep>
@@ -48,6 +48,8 @@ class TrackActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityTrackBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        uid = intent.getStringExtra("uid") ?: ""
 
         sleepBar = findViewById(R.id.sleepBar)
         exerciseBar = findViewById(R.id.exerciseBar)
@@ -80,7 +82,7 @@ class TrackActivity : AppCompatActivity() {
             // TODAY
             date = LocalDate.now()
             dateString = Constants.DATE_FORMATTER.format(date)
-            fetchForDate(dateString)
+            fetchForDate(date)
         }
 
         val dateText: EditText = findViewById(R.id.dateText)
@@ -93,7 +95,7 @@ class TrackActivity : AppCompatActivity() {
                     date = LocalDate.of(year, monthOfYear + 1, dayOfMonth)
                     val formattedDate = Constants.DATE_FORMATTER.format(date)
                     it.dateText.text = SpannableStringBuilder(formattedDate)
-                    fetchForDate(formattedDate)
+                    fetchForDate(date)
                 },
                 today.year,
                 today.monthValue - 1,
@@ -125,8 +127,10 @@ class TrackActivity : AppCompatActivity() {
 
         val additionalScoreString = additionalScoreTextBox.text.toString()
         val additionalScore = if (additionalScoreString == "") 0 else additionalScoreString.toInt()
-        val essentialsScore = sleepScore + exerciseScore + nutritionScore + infectionScore + meditationScore + overeatingScore + mentalStressScore + physicalStressScore
-        val extrasScore = saunaScore + physiotherapyScore + massageScore + acupunctureScore + hotBathScore + pranayamaScore
+        val essentialsScore =
+            sleepScore + exerciseScore + nutritionScore + infectionScore + meditationScore + overeatingScore + mentalStressScore + physicalStressScore
+        val extrasScore =
+            saunaScore + physiotherapyScore + massageScore + acupunctureScore + hotBathScore + pranayamaScore
         val total: Int = essentialsScore + extrasScore + additionalScore
 
         val notes = findViewById<EditText>(R.id.notes).text.toString()
@@ -151,13 +155,14 @@ class TrackActivity : AppCompatActivity() {
             total
         )
 
-        database.child("${Constants.DATE_FORMATTER.format(date)}").setValue(score)
+        model.saveScore(uid, date, score)
+//        database.child("${Constants.DATE_FORMATTER.format(date)}").setValue(score)
         Toast.makeText(applicationContext, "Progress saved", Toast.LENGTH_LONG).show()
         finish()
     }
 
-    private fun fetchForDate(date: String) {
-        database.child(date).addListenerForSingleValueEvent(object : ValueEventListener {
+    private fun fetchForDate(date: LocalDate) {
+        model.fetchScore(uid, date, object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val score: Score? = dataSnapshot.getValue(Score::class.java)
                 if (score == null) {

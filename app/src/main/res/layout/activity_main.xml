@@ -2,19 +2,19 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/mainLayout"
     android:clickable="true"
     tools:context=".MainActivity">
 
     <ProgressBar
         android:id="@+id/progressBar"
-        android:indeterminate="true"
+        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="invisible"
-        style="?android:attr/progressBarStyleHorizontal"/>
+        android:indeterminate="true"
+        android:visibility="invisible" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -41,9 +41,27 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="visible"
-            tools:visibility="gone" >
+            tools:visibility="gone">
 
-            <include layout="@layout/tabbed_content_main" />
+            <FrameLayout
+                android:id="@+id/tabbedContent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <include
+                    layout="@layout/tabbed_content_main"
+                    tools:visibility="gone" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/newUserHomePage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <include
+                    layout="@layout/new_user_home_page"
+                    tools:visibility="gone" />
+            </FrameLayout>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/trackButton"
@@ -64,7 +82,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:visibility="visible"
-            tools:visibility="gone" >
+            tools:visibility="gone">
 
             <ImageView
                 android:id="@+id/imageView"

@@ -56,8 +56,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             viewPager.setCurrentItem(tab.position, true)
         }.attach()
 
-        model.getScores()
-
         // [START config_signin]
         // Configure Google Sign In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -86,6 +84,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private fun updateUI(user: FirebaseUser?) {
         hideProgressBar()
         if (user != null) {
+            model.getScores(user.uid) {
+                var hasRecords = !model.scoreMap.value.isNullOrEmpty()
+                binding.newUserHomePage.visibility = if (hasRecords) View.GONE else View.VISIBLE
+                binding.tabbedContent.visibility = if (hasRecords) View.VISIBLE else View.GONE
+            }
             binding.signInLayout.visibility = View.GONE
             binding.usersContentLayout.visibility = View.VISIBLE
         } else {
@@ -95,9 +98,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     fun track(view: View) {
-        val intent = Intent(this, TrackActivity::class.java).apply {
+        if (auth.currentUser != null) {
+            val intent = Intent(this, TrackActivity::class.java).apply {
+            }
+            intent.putExtra("uid", auth.currentUser!!.uid)
+            startActivity(intent)
         }
-        startActivity(intent)
     }
 
     override fun onClick(v: View) {
