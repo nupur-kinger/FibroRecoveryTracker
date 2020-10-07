@@ -4,11 +4,12 @@ import java.time.format.DateTimeFormatter
 
 class Constants {
     companion object {
-        val DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MMM-yyy")
-        val POOR_PROGRESS: Double = 0.0
-        val GOOD_PROGRESS: Double = 10.0
-        val POOR_SCORE: Double = 30.0
-        val GOOD_SCORE: Double = 80.0
+        val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MMM-yyy")
+        const val ZERO_PROGRESS: Double = 0.0
+        const val FINE_PROGRESS: Double = 5.0
+        const val GOOD_PROGRESS: Double = 10.0
+        const val POOR_SCORE: Double = 30.0
+        const val GOOD_SCORE: Double = 80.0
     }
 }
 

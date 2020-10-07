@@ -29,6 +29,7 @@ import com.google.android.material.chip.ChipGroup
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.activity_track.*
 import kotlinx.android.synthetic.main.fragment_journey.*
 import m.example.fibrorecoverytracker.databinding.FragmentJourneyBinding
 import m.example.fibrorecoverytracker.listener.ScoreChangeListener
@@ -66,6 +67,8 @@ class JourneyFragment : Fragment() {
     private lateinit var avgNutrition: TextView
     private lateinit var periodChips: ChipGroup
     private lateinit var binding: FragmentJourneyBinding
+
+    private lateinit var defaultSelection: Chip
     private var uid: String? = null
 
     // TODO: Rename and change types of parameters
@@ -101,6 +104,7 @@ class JourneyFragment : Fragment() {
         avgStress = view.findViewById(R.id.avgStress)
         avgNutrition = view.findViewById(R.id.avgNutrition)
         periodChips = binding.periodChips
+        defaultSelection = binding.chip15d
 
         initCharts()
         initPeriods()
@@ -157,35 +161,76 @@ class JourneyFragment : Fragment() {
         if (scoreMap.isEmpty()) {
             return
         }
-        setScore(percentage(scoreMap.values.map { score -> score.sleepScore }, Sleep.LESS_THAN_7.min(), Sleep.LESS_THAN_7.max()), avgSleep)
-        setScore(percentage(scoreMap.values.map { score -> score.exerciseScore }, Exercise.NONE.min(), Exercise.NONE.max()), avgExercise)
-        setScore(percentage(scoreMap.values.map { score -> score.mentalStressScore }, MentalStress.HAPPY.min(), MentalStress.HAPPY.max()), avgStress)
-        setScore(percentage(scoreMap.values.map { score -> score.nutritionScore }, Nutrition.BAD.min(), Nutrition.BAD.max()), avgNutrition)
+        setScore(
+            percentage(
+                scoreMap.values.map { score -> score.sleepScore },
+                Sleep.LESS_THAN_7.min(),
+                Sleep.LESS_THAN_7.max()
+            ), avgSleep
+        )
+        setScore(
+            percentage(
+                scoreMap.values.map { score -> score.exerciseScore },
+                Exercise.NONE.min(),
+                Exercise.NONE.max()
+            ), avgExercise
+        )
+        setInverseScore(
+            percentage(
+                scoreMap.values.map { score -> score.mentalStressScore },
+                MentalStress.HAPPY.min(),
+                MentalStress.HAPPY.max()
+            ), avgStress
+        )
+        setScore(
+            percentage(
+                scoreMap.values.map { score -> score.nutritionScore },
+                Nutrition.BAD.min(),
+                Nutrition.BAD.max()
+            ), avgNutrition
+        )
 
         val avgProgressScore = average(scoreMap.values.map { score -> score.total })
-        val color = when(avgProgressScore) {
-            in Double.MIN_VALUE..Constants.POOR_PROGRESS -> "#FF0000"
-            in Constants.POOR_PROGRESS..Constants.GOOD_PROGRESS -> "#E1AC00"
-            else -> "#00FF00"
+        val color = when (avgProgressScore) {
+            in -Double.MAX_VALUE..Constants.ZERO_PROGRESS -> "#FF0000"
+            in Constants.ZERO_PROGRESS..Constants.FINE_PROGRESS -> "#E1AC00"
+            in Constants.FINE_PROGRESS..Constants.GOOD_PROGRESS -> "#00B300"
+            else -> "#00B300"
         }
         avgProgress.setTextColor(Color.parseColor(color))
-        avgProgress.text = "${DECIMAL_FORMAT.format(avgProgressScore)}"
+        avgProgress.text = when (avgProgressScore) {
+            in -Double.MAX_VALUE..Constants.ZERO_PROGRESS -> "POOR PROGRESS"
+            in Constants.ZERO_PROGRESS..Constants.FINE_PROGRESS -> "YOU CAN DO BETTER"
+            in Constants.FINE_PROGRESS..Constants.GOOD_PROGRESS -> "GOOD PROGRESS"
+            else -> "AWESOME PROGRESS!"
+        }
     }
 
     private fun setScore(score: Double, textView: TextView) {
-        val color = when(score) {
+        val color = when (score) {
             in 0.0..Constants.POOR_SCORE -> "#FF0000"
             in Constants.POOR_SCORE..Constants.GOOD_SCORE -> "#E1AC00"
-            else -> "#00FF00"
+            else -> "#00B300"
         }
         textView.setTextColor(Color.parseColor(color))
         textView.text = "${DECIMAL_FORMAT.format(score)}%"
     }
 
+    private fun setInverseScore(score: Double, textView: TextView) {
+        val invScore = 100 - score
+        val color = when (invScore) {
+            in 0.0..Constants.POOR_SCORE -> "#00B300"
+            in Constants.POOR_SCORE..Constants.GOOD_SCORE -> "#E1AC00"
+            else -> "#FF0000"
+        }
+        textView.setTextColor(Color.parseColor(color))
+        textView.text = "${DECIMAL_FORMAT.format(invScore)}%"
+    }
+
     private fun percentage(scores: List<Int>, min: Int, max: Int): Double {
         val avg = scores.stream().collect(Collectors.averagingInt { num -> num.toInt() })
-        val diff = 0-min
-        return ((avg+diff)/(max+diff))*100
+        val diff = 0 - min
+        return ((avg + diff) / (max + diff)) * 100
     }
 
     private fun average(scores: List<Int>): Double =
@@ -202,13 +247,16 @@ class JourneyFragment : Fragment() {
         activity?.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
         val width: Int = displayMetrics.widthPixels
         for (chart in chartsList) {
-            chart.layoutParams.width = width - width / 8
+            chart.layoutParams.width = width - width / 3
         }
     }
 
     private fun initPeriods() {
-        binding.chipOverall.isChecked = true
+        defaultSelection.isChecked = true
         binding.periodChips.setOnCheckedChangeListener { _, _ ->
+            if (binding.periodChips.checkedChipId == ChipGroup.NO_ID) {
+                defaultSelection.isChecked = true
+            }
             refreshScores()
         }
     }
@@ -218,6 +266,7 @@ class JourneyFragment : Fragment() {
         sleepBarChart.setPinchZoom(true)
         sleepBarChart.legend.isEnabled = false
         sleepBarChart.axisRight.setDrawLabels(false)
+        sleepBarChart.axisLeft.valueFormatter = SleepScoreValueFormatter()
 
         var xAxis = sleepBarChart.xAxis
         xAxis.valueFormatter = DateValueFormatter(dates)
@@ -225,9 +274,11 @@ class JourneyFragment : Fragment() {
         xAxis.labelRotationAngle = 315F
 
         var dataSet1 = BarDataSet(mutableListOf(), "")
+        dataSet1.color = ContextCompat.getColor(context!!, android.R.color.holo_blue_light)
         val dataSets: ArrayList<IBarDataSet> = ArrayList()
         dataSets.add(dataSet1)
         sleepBarChart.data = BarData(dataSets)
+        sleepBarChart.data.setDrawValues(false)
     }
 
     private fun initLineChart() {
@@ -251,9 +302,6 @@ class JourneyFragment : Fragment() {
         set1.setDrawCircleHole(false)
         set1.valueTextSize = 9f
         set1.setDrawFilled(true)
-//        set1.formLineWidth = 1f
-//        set1.formLineDashEffect = DashPathEffect(floatArrayOf(10f, 5f), 0f)
-//        set1.formSize = 15f
         if (Utils.getSDKInt() >= 18) {
             val drawable =
                 ContextCompat.getDrawable(context!!, android.R.color.holo_blue_light)
@@ -273,6 +321,7 @@ class JourneyFragment : Fragment() {
     }
 
     private fun redrawSleepBarChart() {
+        sleepBarChart.xAxis.mEntries = floatArrayOf()
         sleepBarChart.xAxis.valueFormatter = DateValueFormatter(dates)
         val values: ArrayList<BarEntry> = ArrayList()
         var index = 0
@@ -290,6 +339,7 @@ class JourneyFragment : Fragment() {
     }
 
     private fun redrawLineChart() {
+        overallProgressLineChart.xAxis.mEntries = floatArrayOf()
         overallProgressLineChart.xAxis.valueFormatter = DateValueFormatter(dates)
         val values: ArrayList<Entry> = ArrayList()
         var score = initialScore
@@ -333,6 +383,18 @@ class JourneyFragment : Fragment() {
     class DateValueFormatter(private val datesArray: ArrayList<LocalDate>) : ValueFormatter() {
         override fun getAxisLabel(value: Float, axis: AxisBase?): String {
             return Constants.DATE_FORMATTER.format(datesArray[value.toInt()])
+        }
+    }
+
+    class SleepScoreValueFormatter() : ValueFormatter() {
+        override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+            return when (value) {
+                Sleep.LESS_THAN_7.score().toFloat() -> Sleep.LESS_THAN_7.toString()
+                Sleep.MORE_THAN_7.score().toFloat() -> Sleep.MORE_THAN_7.toString()
+                Sleep.MORE_THAN_8.score().toFloat() -> Sleep.MORE_THAN_8.toString()
+                Sleep.MORE_THAN_9.score().toFloat() -> Sleep.MORE_THAN_9.toString()
+                else -> ""
+            }
         }
     }
 }

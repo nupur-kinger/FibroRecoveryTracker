@@ -65,7 +65,7 @@
         android:id="@+id/chartsCard"
         style="@style/JourneyCard"
         android:layout_width="match_parent"
-        android:layout_height="280dp"
+        android:layout_height="300dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/periodChips">
 
@@ -85,12 +85,14 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_below="@id/chartsTitle">
 
                 <HorizontalScrollView
                     android:id="@+id/chartsScrollView"
                     android:layout_width="0dp"
                     android:layout_height="250dp"
+                    android:layout_marginTop="10dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
@@ -105,6 +107,24 @@
                             android:layout_height="match_parent"
                             android:layout_margin="15dp"
                             app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/overallProgressLineChartTitle" />
+
+                        <TextView
+                            android:id="@+id/overallProgressLineChartTitle"
+                            style="@style/ChartTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Overall Progress"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/sleepBarChartTitle"
+                            style="@style/ChartTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sleep Patterns"
+                            app:layout_constraintStart_toEndOf="@id/overallProgressLineChart"
                             app:layout_constraintTop_toTopOf="parent" />
 
                         <com.github.mikephil.charting.charts.BarChart
@@ -113,7 +133,7 @@
                             android:layout_height="match_parent"
                             android:layout_margin="15dp"
                             app:layout_constraintStart_toEndOf="@id/overallProgressLineChart"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toBottomOf="@id/sleepBarChartTitle" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </HorizontalScrollView>
@@ -145,20 +165,15 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/avgProgressLabel"
-                style="@style/ScoreReportsLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Average Progress"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/scoreReportsTitle" />
-
-            <TextView
                 android:id="@+id/avgProgress"
-                style="@style/ScoreReportsValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toEndOf="@id/avgProgressLabel"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/mtrl_on_surface_disabled"
+                android:textSize="15sp"
+                android:textStyle="bold|italic"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/scoreReportsTitle" />
 
             <TextView
@@ -166,9 +181,9 @@
                 style="@style/ScoreReportsLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Average Sleep"
+                android:text="Sleep"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/avgProgressLabel" />
+                app:layout_constraintTop_toBottomOf="@+id/avgProgress" />
 
             <TextView
                 android:id="@+id/avgSleep"
@@ -176,14 +191,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toEndOf="@id/avgSleepLabel"
-                app:layout_constraintTop_toBottomOf="@+id/avgProgressLabel" />
+                app:layout_constraintTop_toBottomOf="@+id/avgProgress" />
 
             <TextView
                 android:id="@+id/avgExerciseLabel"
                 style="@style/ScoreReportsLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Average Exercise"
+                android:text="Exercise"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/avgSleepLabel" />
 
@@ -200,7 +215,7 @@
                 style="@style/ScoreReportsLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Average Stress"
+                android:text="Stress"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/avgExerciseLabel" />
 
@@ -217,7 +232,7 @@
                 style="@style/ScoreReportsLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Average Nutrition"
+                android:text="Nutrition"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/avgStressLabel" />
 

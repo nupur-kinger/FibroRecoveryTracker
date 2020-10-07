@@ -46,21 +46,21 @@
             <FrameLayout
                 android:id="@+id/tabbedContent"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                tools:visibility="gone"
+                android:visibility="invisible">
 
-                <include
-                    layout="@layout/tabbed_content_main"
-                    tools:visibility="gone" />
+                <include layout="@layout/tabbed_content_main" />
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/newUserHomePage"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                tools:visibility="gone"
+                android:visibility="invisible">
 
-                <include
-                    layout="@layout/new_user_home_page"
-                    tools:visibility="gone" />
+                <include layout="@layout/new_user_home_page" />
             </FrameLayout>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
